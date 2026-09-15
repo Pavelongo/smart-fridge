@@ -14,6 +14,7 @@ app.get("/fridge/:id", (req, res) => {
 app.listen(PORT, () => {
     console.log(`🧊 Smart Fridge funcionando en http://localhost:${PORT}`);
 });
+git commit -m "Smart Fridge first version"
 
 
 
