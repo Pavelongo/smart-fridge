@@ -2,7 +2,8 @@ const express = require("express");
 const path = require("path");
 
 const app = express();
-const PORT = 3000;
+
+const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
 app.use(express.static("public"));
@@ -14,7 +15,3 @@ app.get("/fridge/:id", (req, res) => {
 app.listen(PORT, () => {
     console.log(`🧊 Smart Fridge funcionando en http://localhost:${PORT}`);
 });
-git commit -m "Smart Fridge first version"
-
-
-
