@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Fridge</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f4f7f9;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        .box {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+        }
+
+        input[type="text"] {
+            padding: 10px;
+            width: 65%;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+        }
+
+        button {
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        li {
+            margin: 12px 0;
+            font-size: 18px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="box">
+
+        <h1>🧊 Smart Fridge</h1>
+
+        <h2>🛒 Lista de supermercado</h2>
+
+        <input id="product" type="text" placeholder="Ej: Leche">
+
+        <button onclick="addProduct()">
+            Agregar
+        </button>
+
+        <ul id="list"></ul>
+
+    </div>
+
+    <script>
+        function addProduct() {
+            const input = document.getElementById("product");
+            const product = input.value.trim();
+
+            if (product === "") {
+                return;
+            }
+
+            const li = document.createElement("li");
+
+            li.innerHTML = `
+                <input type="checkbox">
+                ${product}
+                <button onclick="this.parentElement.remove()">
+                    ❌
+                </button>
+            `;
+
+            document.getElementById("list").appendChild(li);
+
+            input.value = "";
+        }
+    </script>
+
+</body>
