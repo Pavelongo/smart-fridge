@@ -1,4 +1,5 @@
-<!DOCTYPE html>
+
+        <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -14,7 +15,7 @@
             background: #f4f7f9;
         }
 
-        h1 {
+        h1, h2 {
             text-align: center;
         }
 
@@ -24,68 +25,231 @@
             border-radius: 15px;
         }
 
+        .input-area {
+            display: flex;
+            gap: 10px;
+        }
+
         input[type="text"] {
             padding: 10px;
-            width: 65%;
+            flex: 1;
             border: 1px solid #ccc;
             border-radius: 8px;
+            font-size: 16px;
         }
 
         button {
-            padding: 10px;
+            padding: 10px 15px;
             border: none;
             border-radius: 8px;
             cursor: pointer;
+            background: #e8eef2;
+        }
+
+        .add-button {
+            background: #4caf50;
+            color: white;
         }
 
         li {
             margin: 12px 0;
             font-size: 18px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        li span {
+            flex: 1;
+        }
+
+        .delete {
+            margin-left: auto;
+        }
+
+        #status {
+            text-align: center;
+            color: #666;
+            margin-top: 15px;
         }
     </style>
 </head>
 
 <body>
 
-    <div class="box">
+<div class="box">
 
-        <h1>🧊 Smart Fridge</h1>
+    <h1>🧊 Smart Fridge</h1>
 
-        <h2>🛒 Lista de supermercado</h2>
+    <h2>🛒 Lista de supermercado</h2>
 
-        <input id="product" type="text" placeholder="Ej: Leche">
+    <div class="input-area">
 
-        <button onclick="addProduct()">
+        <input
+            id="product"
+            type="text"
+            placeholder="Ej: Leche"
+        >
+
+        <button class="add-button" onclick="addProduct()">
             Agregar
         </button>
 
-        <ul id="list"></ul>
-
     </div>
 
-    <script>
-        function addProduct() {
-            const input = document.getElementById("product");
-            const product = input.value.trim();
+    <ul id="list"></ul>
 
-            if (product === "") {
-                return;
-            }
+    <p id="status">Cargando lista...</p>
 
-            const li = document.createElement("li");
+</div>
 
-            li.innerHTML = `
-                <input type="checkbox">
-                ${product}
-                <button onclick="this.parentElement.remove()">
-                    ❌
-                </button>
-            `;
+<script>
 
-            document.getElementById("list").appendChild(li);
+const fridgeId = window.location.pathname.split("/").pop();
 
-            input.value = "";
+async function loadList() {
+
+    try {
+
+        const response = await fetch(`/api/fridge/${fridgeId}`);
+
+        if (!response.ok) {
+            throw new Error("Error cargando lista");
         }
-    </script>
+
+        const items = await response.json();
+
+        document.getElementById("list").innerHTML = "";
+
+        items.forEach(item => {
+            createProduct(item.name, item.checked);
+        });
+
+        document.getElementById("status").textContent =
+            "✅ Lista cargada";
+
+    } catch (error) {
+
+        console.error(error);
+
+        document.getElementById("status").textContent =
+            "❌ No se pudo cargar la lista";
+    }
+}
+
+
+function createProduct(name, checked = false) {
+
+    const li = document.createElement("li");
+
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.checked = checked;
+
+    const span = document.createElement("span");
+    span.textContent = name;
+
+    const deleteButton = document.createElement("button");
+    deleteButton.className = "delete";
+    deleteButton.textContent = "❌";
+
+    checkbox.addEventListener("change", saveList);
+
+    deleteButton.addEventListener("click", () => {
+
+        li.remove();
+
+        saveList();
+    });
+
+    li.appendChild(checkbox);
+    li.appendChild(span);
+    li.appendChild(deleteButton);
+
+    document.getElementById("list").appendChild(li);
+}
+
+
+function addProduct() {
+
+    const input = document.getElementById("product");
+
+    const product = input.value.trim();
+
+    if (product === "") {
+        return;
+    }
+
+    createProduct(product);
+
+    input.value = "";
+
+    saveList();
+}
+
+
+document.getElementById("product").addEventListener("keydown", event => {
+
+    if (event.key === "Enter") {
+        addProduct();
+    }
+
+});
+
+
+async function saveList() {
+
+    const items = [];
+
+    document.querySelectorAll("#list li").forEach(li => {
+
+        const checkbox = li.querySelector("input");
+
+        const name = li.querySelector("span").textContent;
+
+        items.push({
+            name: name,
+            checked: checkbox.checked
+        });
+
+    });
+
+    try {
+
+        const response = await fetch(`/api/fridge/${fridgeId}`, {
+
+            method: "POST",
+
+            headers: {
+                "Content-Type": "application/json"
+            },
+
+            body: JSON.stringify({
+                items: items
+            })
+
+        });
+
+        if (!response.ok) {
+            throw new Error("Error guardando");
+        }
+
+        document.getElementById("status").textContent =
+            "💾 Lista guardada";
+
+    } catch (error) {
+
+        console.error(error);
+
+        document.getElementById("status").textContent =
+            "❌ Error guardando la lista";
+    }
+}
+
+
+loadList();
+
+</script>
 
 </body>
+</html>
